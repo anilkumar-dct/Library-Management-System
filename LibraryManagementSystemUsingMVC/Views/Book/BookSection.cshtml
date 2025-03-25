@@ -1,0 +1,83 @@
+﻿@model List<Book>
+<div class="container mt-4">
+    <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="m-0">Library Management</h3>
+            <a class="btn btn-primary" asp-controller="Book" asp-action="AddNewBook">
+                <i class="bi bi-plus"></i> Add Book
+            </a>
+        </div>
+        <!-- Search and Filters -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <input type="text" name="searchQuery" class="form-control w-50" placeholder="Search books..." value="@Context.Request.Query["searchQuery"]">
+            <div>
+                <button class="btn btn-outline-secondary">All Genres</button>
+                <button class="btn btn-outline-secondary">All Status</button>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Author</th>
+                    <th>Genre</th>
+                    <th>Year</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var data in Model){
+                    <tr>
+                        <td>@data.BookTitle</td>
+                        <td>@data.Author</td>
+                        <td>@data.Genre</td>
+                        <td>@data.Year</td>
+                        <td >
+                            @if(data.Status==true){
+                                <span class="badge bg-success">Available</span>
+                            }
+                            else{
+                                <span class="badge bg-warning">Borrowed</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="w-75 btn-group d-flex justify-content-center">
+                                <a class="btn btn-primary rounded-2 btn-sm m-1" asp-controller="Book" asp-action="EditBook" asp-route-id="@data.Id">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a class="btn btn-danger rounded-2 btn-sm m-1" asp-controller="Book" asp-action="DeleteBook" asp-route-id="@data.Id">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
+                            </div>
+                        </td>
+                  </tr>
+              }
+            </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center">
+            <select class="form-select w-auto">
+                <option>10 per page</option>
+                <option>20 per page</option>
+                <option>50 per page</option>
+            </select>
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item"><a class="page-link" href="#">«</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link" href="#">...</a></li>
+                    <li class="page-item"><a class="page-link" href="#">10</a></li>
+                    <li class="page-item"><a class="page-link" href="#">»</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+@* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> *@
