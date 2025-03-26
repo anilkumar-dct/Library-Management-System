@@ -7,12 +7,28 @@
                 <i class="bi bi-plus"></i> Add Book
             </a>
         </div>
+
         <!-- Search and Filters -->
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <input type="text" name="searchQuery" class="form-control w-50" placeholder="Search books..." value="@Context.Request.Query["searchQuery"]">
-            <div>
-                <button class="btn btn-outline-secondary">All Genres</button>
-                <button class="btn btn-outline-secondary">All Status</button>
+            <form method="GET" action="/" class="d-flex w-100">
+                <input name="search" type="text" class="form-control w-50" placeholder="Search books...">
+            </form>
+            <div class="d-flex gap-3">
+                @* <form method="GET" action="@Url.Action("Genre", "Book")"> *@
+                <form method="GET" asp-action="Genre" asp-controller="Book">
+                    <label class="form-label"></label>
+                    <select name="genre" class="form-select bg-secondary text-light border-0" onchange="this.form.submit()">
+                        <option value="">All Genre</option> <!-- Empty value ensures validation triggers -->
+                        <option value="Fiction" selected="@(ViewBag.SelectedGenre == "Fiction" ? "selected" : null)">Fiction</option>
+                        <option value="Science Fiction" selected="@(ViewBag.SelectedGenre == "Science Fiction" ? "selected" : null)">Science Fiction</option>
+                        <option value="Non-Fiction" selected="@(ViewBag.SelectedGenre == "Non-Fiction" ? "selected" : null)">Non-Fiction</option>
+                        <option value="Mystery" selected="@(ViewBag.SelectedGenre == "Mystery" ? "selected" : null)">Mystery</option>
+                    </select>
+                </form>
+                @* <a class="btn btn-outline-secondary text-decoration-none text-nowrap" asp-action="Genre" asp-controller="Book" >All Genre</a> *@
+                 @* <button class="btn btn-outline-secondary">All Genres</button> *@ 
+                 <a class="btn btn-outline-secondary text-nowrap text-decoration-none align-self-end" asp-action="BookSection" asp-controller="Book"> All Genre </a> 
+               
             </div>
         </div>
 
@@ -28,14 +44,14 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="bookResults">
                 @foreach(var data in Model){
                     <tr>
                         <td>@data.BookTitle</td>
                         <td>@data.Author</td>
                         <td>@data.Genre</td>
                         <td>@data.Year</td>
-                        <td >
+                        <td>
                             @if(data.Status==true){
                                 <span class="badge bg-success">Available</span>
                             }
@@ -53,8 +69,8 @@
                                 </a>
                             </div>
                         </td>
-                  </tr>
-              }
+                    </tr>
+                }
             </tbody>
         </table>
 
@@ -80,4 +96,103 @@
     </div>
 </div>
 
+@* <script> *@
+@*     document.getElementById("searchQuery").addEventListener("keyup", function () { *@
+@*         let searchValue = this.value; *@
+        
+@*         fetch(`/Book/LiveSearch?searchQuery=${encodeURIComponent(searchValue)}`) *@
+@*             .then(response => response.json()) *@
+@*             .then(data => { *@
+@*                 let resultsContainer = document.getElementById("bookResults"); *@
+@*                 resultsContainer.innerHTML = ""; *@
+                
+@*                 if (data.length === 0) { *@
+@*                     resultsContainer.innerHTML = "<tr><td colspan='6' class='text-danger text-center'>No books found</td></tr>"; *@
+@*                     return; *@
+@*                 } *@
+
+@*                 data.forEach(book => { *@
+@*                     let statusBadge = book.status ? '<span class="badge bg-success">Available</span>' : '<span class="badge bg-warning">Borrowed</span>'; *@
+@*                     resultsContainer.innerHTML += ` *@
+@*                         <tr> *@
+@*                             <td>${book.bookTitle}</td> *@
+@*                             <td>${book.author}</td> *@
+@*                             <td>${book.genre}</td> *@
+@*                             <td>${book.year}</td> *@
+@*                             <td>${statusBadge}</td> *@
+@*                             <td> *@
+@*                                 <div class="w-75 btn-group d-flex justify-content-center"> *@
+@*                                     <a class="btn btn-primary rounded-2 btn-sm m-1" href="/Book/EditBook/${book.id}"> *@
+@*                                         <i class="bi bi-pencil-square"></i> *@
+@*                                     </a> *@
+@*                                     <a class="btn btn-danger rounded-2 btn-sm m-1" href="/Book/DeleteBook/${book.id}"> *@
+@*                                         <i class="bi bi-trash3"></i> *@
+@*                                     </a> *@
+@*                                 </div> *@
+@*                             </td> *@
+@*                         </tr>`; *@
+@*                 }); *@
+@*             }) *@
+@*             .catch(error => console.error("Error fetching search results:", error)); *@
+@*     }); *@
+@* </script> *@
+
 @* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> *@
+
+@*  Note* : some Element in html are given below which are having different roles mentioned with it for reference *@
+@*         <input>	Stores and captures user input (like book title, search text, etc.) *@
+@*         <form>	Tells how and where to send the input data (via submission) *@
+
+@* 1️⃣ Input Fields (Collect Data) *@
+@* These elements are used to accept user input: *@
+
+@* <input> (text, password, number, email, etc.) *@
+
+@* <textarea> (multiline text) *@
+
+@* <select> (dropdowns) *@
+
+@* <button> (can submit forms) *@
+
+@* <checkbox> & <radio> (multiple-choice options) *@
+
+@*  Example: *@
+@*     <input type="text" placeholder="Enter book title"> <!-- Text input --> *@
+@* <input type="password" placeholder="Enter password"> <!-- Password field --> *@
+@* <input type="email" placeholder="Enter email"> <!-- Email input --> *@
+@* <input type="number" placeholder="Enter quantity"> <!-- Number input --> *@
+@* <input type="checkbox"> Accept Terms <!-- Checkbox --> *@
+@* <input type="radio" name="status" value="Available"> Available <!-- Radio button --> *@
+@* <select> *@
+@*     <option value="Fiction">Fiction</option> *@
+@*     <option value="Science Fiction">Science Fiction</option> *@
+@* </select> <!-- Dropdown select --> *@
+@* <textarea placeholder="Enter description"></textarea> <!-- Multiline text --> *@
+
+@* Form Elements (Send Data) *@
+@* These elements group and send input data: *@
+
+@* <form> (the main container that sends data) *@
+
+@* <button type="submit"> (to submit the form) *@
+
+@* <fieldset> (groups related inputs) *@
+
+@* <label> (describes an input field) *@
+
+@* Example: *@
+@* <form asp-action="AddBook" asp-controller="Book" method="post"> *@
+@*     <label for="bookTitle">Book Title:</label> *@
+@*     <input type="text" id="bookTitle" name="BookTitle" required> *@
+
+@*     <label for="author">Author:</label> *@
+@*     <input type="text" id="author" name="Author" required> *@
+
+@*     <button type="submit">Submit</button> *@
+@* </form> *@
+
+@* What happens here? *@
+
+@* User enters data in inputs. *@
+
+@* Clicking "Submit" sends data to the controller (AddBook in BookController). *@

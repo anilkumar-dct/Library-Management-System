@@ -14,7 +14,8 @@ namespace LibraryManagementSystemUsingMVC.Models
         public string BookTitle { get; set; }
 
         [Required(ErrorMessage = "Author name is required.")]
-        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Author name must contain only letters and spaces.")]
+        [RegularExpression(@"^[a-zA-Z\s.,'’\-]+$", ErrorMessage = "Author name must contain only letters, spaces, and valid symbols (.,-'’).")]
+
         public string Author { get; set; }
 
         [Required(ErrorMessage = "Genre is required.")]
