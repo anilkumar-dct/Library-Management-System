@@ -50,7 +50,7 @@ namespace LibraryManagementSystemUsingMVC.Controllers
             // Get all books from the database
               
             var books = _db.BookData.AsQueryable();
-
+          
             // If search query is provided, filter books
             if (!string.IsNullOrEmpty(searchQuery))
             {
@@ -59,6 +59,7 @@ namespace LibraryManagementSystemUsingMVC.Controllers
                                       || b.Author.ToLower().Contains(searchQuery)
                                       || b.Genre.ToLower().Contains(searchQuery));
             }
+            if (string.IsNullOrWhiteSpace(searchQuery)) return NotFound();
 
             return View("BookSection", books.ToList()); // Pass filtered books to the view
         }
@@ -155,14 +156,21 @@ namespace LibraryManagementSystemUsingMVC.Controllers
         public IActionResult Genre(string? genre)
         {
             var books = _db.BookData.AsQueryable(); // Get all books
-
+            
             if (!string.IsNullOrEmpty(genre))
             {
                 books = books.Where(b => b.Genre == genre); // Filter books by genre
             }
 
-            ViewBag.SelectedGenre = genre; // Store selected genre for the dropdown
-            return View("BookSection", books.ToList()); // Return filtered books
+            var filteredBooks = books.ToList(); // Convert to list after filtering
+
+            if (!filteredBooks.Any()) // Check if no books match the genre
+            {
+                ModelState.AddModelError("Genre", $"No books found in the '{genre}' genre.");
+              // Return 404 if no match
+            }
+                        ViewBag.SelectedGenre = genre; // Store selected genre for the dropdown
+            return View("BookSection", filteredBooks); // Return filtered books
         }
     }
 }

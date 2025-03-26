@@ -25,10 +25,10 @@
                         <option value="Mystery" selected="@(ViewBag.SelectedGenre == "Mystery" ? "selected" : null)">Mystery</option>
                     </select>
                 </form>
+                
                 @* <a class="btn btn-outline-secondary text-decoration-none text-nowrap" asp-action="Genre" asp-controller="Book" >All Genre</a> *@
                  @* <button class="btn btn-outline-secondary">All Genres</button> *@ 
-                 <a class="btn btn-outline-secondary text-nowrap text-decoration-none align-self-end" asp-action="BookSection" asp-controller="Book"> All Genre </a> 
-               
+                 <a class="btn btn-outline-secondary text-nowrap text-decoration-none align-self-end" asp-action="BookSection" asp-controller="Book"> All Genre </a>
             </div>
         </div>
 
@@ -45,29 +45,43 @@
                 </tr>
             </thead>
             <tbody id="bookResults">
-                @foreach(var data in Model){
+                @if (Model.Any())
+                {
+                    @foreach (var data in Model)
+                    {
+                        <tr>
+                            <td>@data.BookTitle</td>
+                            <td>@data.Author</td>
+                            <td>@data.Genre</td>
+                            <td>@data.Year</td>
+                            <td>
+                                @if (data.Status==true)
+                                {
+                                    <span class="badge bg-success">Available</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Borrowed</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="w-75 btn-group d-flex justify-content-center">
+                                    <a class="btn btn-primary rounded-2 btn-sm m-1" asp-controller="Book" asp-action="EditBook" asp-route-id="@data.Id">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a class="btn btn-danger rounded-2 btn-sm m-1" asp-controller="Book" asp-action="DeleteBook" asp-route-id="@data.Id">
+                                        <i class="bi bi-trash3"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
                     <tr>
-                        <td>@data.BookTitle</td>
-                        <td>@data.Author</td>
-                        <td>@data.Genre</td>
-                        <td>@data.Year</td>
-                        <td>
-                            @if(data.Status==true){
-                                <span class="badge bg-success">Available</span>
-                            }
-                            else{
-                                <span class="badge bg-warning">Borrowed</span>
-                            }
-                        </td>
-                        <td>
-                            <div class="w-75 btn-group d-flex justify-content-center">
-                                <a class="btn btn-primary rounded-2 btn-sm m-1" asp-controller="Book" asp-action="EditBook" asp-route-id="@data.Id">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <a class="btn btn-danger rounded-2 btn-sm m-1" asp-controller="Book" asp-action="DeleteBook" asp-route-id="@data.Id">
-                                    <i class="bi bi-trash3"></i>
-                                </a>
-                            </div>
+                        <td colspan="6" class="text-danger text-center">
+                            @Html.ValidationMessage("Genre")
                         </td>
                     </tr>
                 }
