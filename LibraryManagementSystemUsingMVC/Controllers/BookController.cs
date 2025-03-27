@@ -35,34 +35,44 @@ namespace LibraryManagementSystemUsingMVC.Controllers
         // Method to fetch and display all books
         public IActionResult BookSection()
         {
+            //below thing is used to read prams and it is pass to the same view where you are added searching option.
             string searchTerm = HttpContext.Request.Query["search"];
 
             //step 2. THE Implement of step 2.
             var books = _db.BookData.Where(b => string.IsNullOrEmpty(searchTerm) ||
                     b.BookTitle.Contains(searchTerm) ||
-                    b.Author.Contains(searchTerm)).ToList(); // Retrieve all books from the database
+                    b.Author.Contains(searchTerm)).ToList();
+
+            if (!books.Any())
+            {
+                //while using ModelState.AddModelError we need to pass the view of the  first "BookSection" from where the error is coming and the error message.after ",".
+                ModelState.AddModelError("BookSection", $"No Result is Found");
+            }
+
+            // Retrieve all books from the database
             return View(books); // Pass the book list to the view
         }
 
         //Search Query. 
-        public IActionResult SearchBook(string searchQuery)
-        {
-            // Get all books from the database
+        //public IActionResult SearchBook(string? searchQuery)
+        //{
+        //    // Get all books from the database
               
-            var books = _db.BookData.AsQueryable();
+        //    var books = _db.BookData.AsQueryable();
           
-            // If search query is provided, filter books
-            if (!string.IsNullOrEmpty(searchQuery))
-            {
-                searchQuery = searchQuery.ToLower(); // Convert query to lowercase for case-insensitive search
-                books = books.Where(b => b.BookTitle.ToLower().Contains(searchQuery)
-                                      || b.Author.ToLower().Contains(searchQuery)
-                                      || b.Genre.ToLower().Contains(searchQuery));
-            }
-            if (string.IsNullOrWhiteSpace(searchQuery)) return NotFound();
+        //    // If search query is provided, filter books
+        //    if (!string.IsNullOrEmpty(searchQuery))
+        //    {
+        //        searchQuery = searchQuery.ToLower(); // Convert query to lowercase for case-insensitive search
+        //        books = books.Where(b => b.BookTitle.ToLower().Contains(searchQuery)
+        //                              || b.Author.ToLower().Contains(searchQuery)
+        //                              || b.Genre.ToLower().Contains(searchQuery));
+        //    }
+            
+        //    //if (string.IsNullOrWhiteSpace(searchQuery)) return NotFound();
 
-            return View("BookSection", books.ToList()); // Pass filtered books to the view
-        }
+        //    return View("BookSection", books.ToList()); // Pass filtered books to the view
+        //}
 
         //Controller for Live Search for searchSection
         //[HttpGet]
@@ -169,7 +179,7 @@ namespace LibraryManagementSystemUsingMVC.Controllers
                 ModelState.AddModelError("Genre", $"No books found in the '{genre}' genre.");
               // Return 404 if no match
             }
-                        ViewBag.SelectedGenre = genre; // Store selected genre for the dropdown
+            ViewBag.SelectedGenre = genre; // Store selected genre for the dropdown
             return View("BookSection", filteredBooks); // Return filtered books
         }
     }
