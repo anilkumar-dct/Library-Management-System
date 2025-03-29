@@ -182,5 +182,13 @@ namespace LibraryManagementSystemUsingMVC.Controllers
             ViewBag.SelectedGenre = genre; // Store selected genre for the dropdown
             return View("BookSection", filteredBooks); // Return filtered books
         }
+
+        #region API CALLS
+        [HttpGet]
+        public IActionResult getall()
+        {
+            return Json(_db);
+        }
+        #endregion
     }
 }
