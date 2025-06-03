@@ -1,4 +1,6 @@
 using LibraryManagementSystemUsingMVC.Data;
+using LibraryManagementSystemUsingMVC.Models;
+using LibraryManagementSystemUsingMVC.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryManagementSystemUsingMVC
@@ -21,7 +23,8 @@ namespace LibraryManagementSystemUsingMVC
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
         options.JsonSerializerOptions.WriteIndented = true;
     });
-
+            builder.Services.AddScoped(typeof(ICommonRepo<>), typeof(CommonRepo<>));
+            builder.Services.AddScoped<IBookRepo, BookRepo>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

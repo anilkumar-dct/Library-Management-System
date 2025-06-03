@@ -1,7 +1,9 @@
 ﻿using LibraryManagementSystemUsingMVC.Data;
 using LibraryManagementSystemUsingMVC.Models;
+using LibraryManagementSystemUsingMVC.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Threading.Tasks;
 
 namespace LibraryManagementSystemUsingMVC.Controllers
 {
@@ -24,24 +26,24 @@ namespace LibraryManagementSystemUsingMVC.Controllers
 
         //chatgpt explanation
         // Field to store the database context
-        private readonly ApplicationDbContext _db;
+       
+        private readonly IBookRepo _bookRepo;// Using IBookRepo interface for better abstraction
 
         // Constructor to inject the database context
-        public BookController(ApplicationDbContext db)
+        public BookController(IBookRepo bookRepo)
         {
-            _db = db; // Assign the injected context to the private field
+             // Assign the injected context to the private field
+            _bookRepo = bookRepo;
         }
 
         // Method to fetch and display all books
         public IActionResult BookSection()
         {
             //below thing is used to read prams and it is pass to the same view where you are added searching option.
-            string searchTerm = HttpContext.Request.Query["search"];
+         //   string searchTerm = HttpContext.Request.Query["search"];
 
             //step 2. THE Implement of step 2.
-            var books = _db.BookData.Where(b => string.IsNullOrEmpty(searchTerm) ||
-                    b.BookTitle.Contains(searchTerm) ||
-                    b.Author.Contains(searchTerm)).ToList();
+            var books = _bookRepo.GetAllAsync().Result; // Fetch all books from the database using the repository
 
             if (!books.Any())
             {
@@ -97,25 +99,13 @@ namespace LibraryManagementSystemUsingMVC.Controllers
         }
         //THIS post method will hit when you enter the data in the provided fields and then the form method will call this method add apply the changes
         [HttpPost]
-        public IActionResult AddNewBook(Book book)
+        public async Task<IActionResult> AddNewBook(Book book)
         {
-            //if (ModelState.IsValid)
-            //{
-            //    _db.BookData.Add(book);
-            //    _db.SaveChanges();
-            //    return RedirectToAction("BookSection");
-            //}
-
-            //_db.BookData.Add(book);
-            //_db.SaveChanges();
-            //return RedirectToAction("BookSection");
-            ////return View();
-            //-----------
-            //by chatgpt
+            
             if (ModelState.IsValid)
             {
                 // Check if the book title already exists
-                bool bookExists = _db.BookData.Any(b => b.BookTitle == book.BookTitle);
+                bool bookExists = _bookRepo.BookExists(book.BookTitle);
 
                 if (bookExists)
                 {
@@ -123,57 +113,50 @@ namespace LibraryManagementSystemUsingMVC.Controllers
                     return View(book); // Return the view with validation error
                 }
 
-                _db.BookData.Add(book);
-                _db.SaveChanges();
+                 await _bookRepo.AddAsync(book); // Add the book to the database using the repository
+             
                 return RedirectToAction("BookSection");
             }
             return View(book);
         }
         //Creating Edit View
-        public IActionResult EditBook(int? id)
+        public async Task<IActionResult> EditBook(int? id)
         {
             if (id == null || id == 0) { return NotFound(); }
             //this below syntax help us to fetch data that is being select or reterived
-            Book? book = _db.BookData.FirstOrDefault(find => find.Id == id);
+            Book? book =await _bookRepo.GetByIdAsync(b => b.Id == id); // Using the repository to get the book by ID
             if (book == null) { return NotFound(); }
             return View(book);
         }
         [HttpPost]
-        public IActionResult EditBook(Book book)
+        public async Task<IActionResult> EditBook(Book book)
         {
-            _db.BookData.Update(book);
-            _db.SaveChanges();
+            await _bookRepo.UpdateAsync(book); // Update the book in the database using the repositor
             return RedirectToAction("BookSection");
         }
         //Delete method 
-        public IActionResult DeleteBook(int? id)
+        public async Task<IActionResult> DeleteBook(int? id)
         {
             if (id == null || id == 0) { return NotFound(); }
             //this below syntax help us to fetch data that is being select or reterived
-            Book? book = _db.BookData.FirstOrDefault(find => find.Id == id);
+            Book? book = await _bookRepo.GetByIdAsync(u => u.Id == id); // Using the repository to get the book by ID
             if (book == null) { return NotFound(); }
             return View(book);
         }
         //Here don't concerne about how parameter "(Book book)" is working it is done by the connection string that you add into program.cs file and entity framework
         [HttpPost]
-        public IActionResult DeleteBook(Book book)
+        public async Task<IActionResult> DeleteBook(Book book)
         {
-            _db.BookData.Remove(book);
-            _db.SaveChanges();
+            await _bookRepo.DeleteAsync(book); // Delete the book from the database using the repository
             return RedirectToAction("BookSection");
         }
         //Genre ActionMethod
         public IActionResult Genre(string? genre)
         {
-            var books = _db.BookData.AsQueryable(); // Get all books
-            
-            if (!string.IsNullOrEmpty(genre))
-            {
-                books = books.Where(b => b.Genre == genre); // Filter books by genre
-            }
+            var filteredBooks = _bookRepo.GetBooksByGenre(genre);
 
-            var filteredBooks = books.ToList(); // Convert to list after filtering
 
+          
             if (!filteredBooks.Any()) // Check if no books match the genre
             {
                 ModelState.AddModelError("Genre", $"No books found in the '{genre}' genre.");
@@ -187,6 +170,7 @@ namespace LibraryManagementSystemUsingMVC.Controllers
         [HttpGet]
         public IActionResult getall()
         {
+            var _db = _bookRepo.GetAllAsync().Result; // Fetch all books from the database using the repository
             return Json(_db);
         }
         #endregion
